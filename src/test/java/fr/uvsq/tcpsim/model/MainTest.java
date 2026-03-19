@@ -1,4 +1,4 @@
-package fr.uvsq.tcpsim;
+package fr.uvsq.tcpsim.model;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

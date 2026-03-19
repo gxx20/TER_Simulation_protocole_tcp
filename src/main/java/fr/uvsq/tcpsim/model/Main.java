@@ -1,4 +1,4 @@
-package fr.uvsq.tcpsim;
+package fr.uvsq.tcpsim.model;
 
 /**
  * Hello world!

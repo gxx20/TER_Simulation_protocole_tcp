@@ -28,3 +28,4 @@ target/
 .idea/
 .vscode/
 .DS_Store
+.ds_store

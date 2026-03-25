@@ -49,7 +49,7 @@ public class TcpServer {
 
     // Méthode pour recevoir un paquet du client et répondre en fonction de l'état actuel du serveur
     public Packet receivePacket(Packet packet) {
-        System.out.println("[SERVEUR]: Paquet reçu : " + packet);
+        System.out.println("[SERVEUR]: Paquet recu : " + packet);
 
         // processus de handshake en trois étapes
         // Si le serveur reçoit un SYN en état LISTEN, il répond avec un SYN-ACK et passe à l'état SYN_RECEIVED
@@ -71,18 +71,18 @@ public class TcpServer {
         // Si le serveur reçoit un ACK en état SYN_RECEIVED, il passe à l'état ESTABLISHED
         if (state == TcpState.SYN_RECEIVED && packet.getType() == PacketType.ACK) {
             state = TcpState.ESTABLISHED;
-            System.out.println("[SERVEUR]: Connexion établie.");
+            System.out.println("[SERVEUR]: Connexion etablie.");
             return null;
         }
 
-        System.out.println("[SERVEUR]: Paquet inattendu dans l'état " + state);
+        System.out.println("[SERVEUR]: Paquet inattendu dans l'etat " + state);
         return null;
     }
 
     // Méthode pour envoyer des données au client en fonction d'une demande de transfert et de l'état actuel du serveur
     public TransferResult sendData(TransferRequest request) {
         if (state != TcpState.ESTABLISHED) {
-            System.out.println("[SERVEUR]: Impossible d'envoyer des données : connexion non établie.");
+            System.out.println("[SERVEUR]: Impossible d'envoyer des donnees : connexion non etablie.");
             return new TransferResult(new ArrayList<>(), request.getNumberOfPacketsRequested());
         }
 
@@ -94,8 +94,8 @@ public class TcpServer {
         int packetsToSend = Math.min(requestedPackets, receiveWindow);
         packetsToSend = Math.min(packetsToSend, sourceData.size());
 
-        System.out.println("[SERVEUR]: Demande reçue : " + request);
-        System.out.println("[SERVEUR]: Nombre de paquets pouvant être envoyés maintenant : " + packetsToSend);
+        System.out.println("[SERVEUR]: Demande recue : " + request);
+        System.out.println("[SERVEUR]: Nombre de paquets pouvant etre envoyes maintenant : " + packetsToSend);
 
         // Préparer les paquets à envoyer en fonction de la demande du client et des données disponibles
         for (int i = 0; i < packetsToSend; i++) {
@@ -116,7 +116,7 @@ public class TcpServer {
             remainingPackets = 0;
         }
 
-        System.out.println("[SERVEUR]: Paquets placés dans le buffer d'envoi :");
+        System.out.println("[SERVEUR]: Paquets places dans le buffer d'envoi :");
         for (Packet packet : sendBuffer) {
             System.out.println("    " + packet);
         }

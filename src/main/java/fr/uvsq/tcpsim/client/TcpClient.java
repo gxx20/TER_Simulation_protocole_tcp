@@ -37,7 +37,7 @@ public class TcpClient {
 
     // Méthode pour initier une connexion avec le serveur en suivant le processus de handshake en trois étapes
     public void connect(TcpServer server) {
-        System.out.println("[CLIENT]: Début de la demande de connexion.");
+        System.out.println("[CLIENT]: Debut de la demande de connexion.");
 
         Packet synPacket = new Packet(
                 PacketType.SYN,
@@ -53,7 +53,7 @@ public class TcpClient {
 
         // Si le client reçoit un SYN-ACK du serveur, il répond avec un ACK et passe à l'état ESTABLISHED
         if (serverResponse != null && serverResponse.getType() == PacketType.SYN_ACK) {
-            System.out.println("[CLIENT]: Réception de SYN_ACK");
+            System.out.println("[CLIENT]: Reception de SYN_ACK");
 
             acknowledgementNumber = serverResponse.getSequenceNumber() + 1;
 
@@ -69,10 +69,10 @@ public class TcpClient {
 
             server.receivePacket(ackPacket);
 
-            System.out.println("[CLIENT]: Connexion établie.");
+            System.out.println("[CLIENT]: Connexion etablie.");
         // Si le client ne reçoit pas de SYN-ACK ou reçoit une réponse inattendue, la connexion échoue
         } else {
-            System.out.println("[CLIENT]: Échec de l'ouverture de connexion.");
+            System.out.println("[CLIENT]: Echec de l'ouverture de connexion.");
         }
     }
 
@@ -80,7 +80,7 @@ public class TcpClient {
     public void requestData(TcpServer server, int numberOfPackets, int receiveWindow) {
         // Vérifier que la connexion est établie avant de faire une demande de transfert
         if (state != TcpState.ESTABLISHED) {
-            System.out.println("[CLIENT]: Impossible de demander des données : connexion non établie.");
+            System.out.println("[CLIENT]: Impossible de demander des donnees : connexion non etablie.");
             return;
         }
 
@@ -88,7 +88,7 @@ public class TcpClient {
 
         // Créer une demande de transfert avec le nombre de paquets souhaité et la fenêtre de réception
         TransferRequest request = new TransferRequest(numberOfPackets, receiveWindow);
-        System.out.println("[CLIENT]: Envoi d'une requête de transfert : " + request);
+        System.out.println("[CLIENT]: Envoi d'une requete de transfert : " + request);
 
         TransferResult result = server.sendData(request);
 
@@ -99,25 +99,25 @@ public class TcpClient {
             receiveBuffer.add(packet);
         }
 
-        System.out.println("[CLIENT]: Paquets reçus dans le buffer de réception :");
+        System.out.println("[CLIENT]: Paquets reçus dans le buffer de reception :");
         for (Packet packet : receiveBuffer) {
             System.out.println("    " + packet);
         }
 
-        System.out.println("[CLIENT]: Nombre de paquets restant à recevoir plus tard : " + result.getRemainingPackets());
+        System.out.println("[CLIENT]: Nombre de paquets restant a recevoir plus tard : " + result.getRemainingPackets());
 
         sendAcknowledgements();
     }
 
     private void sendAcknowledgements() {
         if (receiveBuffer.isEmpty()) {
-            System.out.println("[CLIENT]: Aucun paquet reçu, aucun ACK envoyé.");
+            System.out.println("[CLIENT]: Aucun paquet recu, aucun ACK envoye.");
             return;
         }
 
-        System.out.println("[CLIENT] Envoi des ACK pour les paquets reçus.");
+        System.out.println("[CLIENT] Envoi des ACK pour les paquets recus.");
         for (Packet packet : receiveBuffer) {
-            System.out.println("    ACK pour le paquet de séquence " + packet.getSequenceNumber());
+            System.out.println("ACK pour le paquet de sequence " + packet.getSequenceNumber());
         }
     }
 }

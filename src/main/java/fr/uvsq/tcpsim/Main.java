@@ -17,8 +17,8 @@ public class Main {
         client.connect(server);
 
         System.out.println();
-        System.out.println("Etat après ouverture - client : " + client.getState());
-        System.out.println("Etat après ouverture - serveur : " + server.getState());
+        System.out.println("Etat apres ouverture - client : " + client.getState());
+        System.out.println("Etat apres ouverture - serveur : " + server.getState());
         System.out.println();
 
         client.requestData(server, 5, 3);

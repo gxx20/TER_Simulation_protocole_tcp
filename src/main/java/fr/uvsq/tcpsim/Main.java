@@ -5,7 +5,7 @@ import fr.uvsq.tcpsim.server.TcpServer;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Simulation du protocole TCP");
+        System.out.println("  Simulation du protocole TCP");
 
         TcpClient client = new TcpClient();
         TcpServer server = new TcpServer();
@@ -19,8 +19,7 @@ public class Main {
         System.out.println();
         System.out.println("Etat apres ouverture - client : " + client.getState());
         System.out.println("Etat apres ouverture - serveur : " + server.getState());
-        System.out.println();
 
-        client.requestData(server, 5, 3);
+        client.requestAllData(server, 7, 3);
     }
 }

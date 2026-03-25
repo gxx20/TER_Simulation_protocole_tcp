@@ -9,7 +9,6 @@ import fr.uvsq.tcpsim.model.TcpState;
 import fr.uvsq.tcpsim.model.TransferRequest;
 import fr.uvsq.tcpsim.model.TransferResult;
 
-// Classe représentant un serveur TCP
 public class TcpServer {
     private TcpState state;
     private int sequenceNumber;
@@ -21,17 +20,21 @@ public class TcpServer {
     // Buffer temporaire d'envoi
     private List<Packet> sendBuffer;
 
-    /* Constructeur initialisant le serveur en état LISTEN avec des numéros de séquence et d'acquittement par défaut */
+    // Position du prochain bloc à envoyer dans la mémoire source
+    private int nextDataIndex;
+
     public TcpServer() {
         this.state = TcpState.LISTEN;
         this.sequenceNumber = 500;
         this.acknowledgementNumber = 0;
         this.sourceData = new ArrayList<>();
         this.sendBuffer = new ArrayList<>();
+        this.nextDataIndex = 0;
+
         initializeSourceData();
     }
 
-    // Méthode pour initialiser les données source du serveur
+    // Initialisation de la mémoire source avec des blocs de données fictifs
     private void initializeSourceData() {
         sourceData.add("Bloc-1");
         sourceData.add("Bloc-2");
@@ -47,12 +50,11 @@ public class TcpServer {
         return state;
     }
 
-    // Méthode pour recevoir un paquet du client et répondre en fonction de l'état actuel du serveur
+    // Méthode pour recevoir un paquet du client et répondre en fonction de l'état actuel du serveur et du type de paquet reçu
     public Packet receivePacket(Packet packet) {
         System.out.println("[SERVEUR]: Paquet recu : " + packet);
 
-        // processus de handshake en trois étapes
-        // Si le serveur reçoit un SYN en état LISTEN, il répond avec un SYN-ACK et passe à l'état SYN_RECEIVED
+        // Si le serveur est en état LISTEN et reçoit un paquet SYN, il répond avec un SYN-ACK et passe à l'état SYN_RECEIVED
         if (state == TcpState.LISTEN && packet.getType() == PacketType.SYN) {
             acknowledgementNumber = packet.getSequenceNumber() + 1;
             state = TcpState.SYN_RECEIVED;
@@ -68,7 +70,7 @@ public class TcpServer {
             return response;
         }
 
-        // Si le serveur reçoit un ACK en état SYN_RECEIVED, il passe à l'état ESTABLISHED
+        // Si le serveur est en état SYN_RECEIVED et reçoit un paquet ACK, il passe à l'état ESTABLISHED et confirme l'établissement de la connexion
         if (state == TcpState.SYN_RECEIVED && packet.getType() == PacketType.ACK) {
             state = TcpState.ESTABLISHED;
             System.out.println("[SERVEUR]: Connexion etablie.");
@@ -79,7 +81,11 @@ public class TcpServer {
         return null;
     }
 
-    // Méthode pour envoyer des données au client en fonction d'une demande de transfert et de l'état actuel du serveur
+    public void resetTransferCursor() {
+        this.nextDataIndex = 0;
+    }
+
+    // Méthode pour traiter une demande de transfert de données du client en fonction de l'état actuel du serveur
     public TransferResult sendData(TransferRequest request) {
         if (state != TcpState.ESTABLISHED) {
             System.out.println("[SERVEUR]: Impossible d'envoyer des donnees : connexion non etablie.");
@@ -91,24 +97,27 @@ public class TcpServer {
         int requestedPackets = request.getNumberOfPacketsRequested();
         int receiveWindow = request.getReceiveWindow();
 
+        int availablePackets = sourceData.size() - nextDataIndex;
         int packetsToSend = Math.min(requestedPackets, receiveWindow);
-        packetsToSend = Math.min(packetsToSend, sourceData.size());
+        packetsToSend = Math.min(packetsToSend, availablePackets);
 
         System.out.println("[SERVEUR]: Demande recue : " + request);
-        System.out.println("[SERVEUR]: Nombre de paquets pouvant etre envoyes maintenant : " + packetsToSend);
+        System.out.println("[SERVEUR]: Index courant dans la memoire source : " + nextDataIndex);
+        System.out.println("[SERVEUR]: Nombre de paquets pouvant être envoyes maintenant : " + packetsToSend);
 
-        // Préparer les paquets à envoyer en fonction de la demande du client et des données disponibles
+        // Placer les paquets à envoyer dans le buffer d'envoi
         for (int i = 0; i < packetsToSend; i++) {
-            String data = sourceData.get(i);
+            String data = sourceData.get(nextDataIndex);
 
             Packet dataPacket = new Packet(
                     PacketType.DATA,
-                    sequenceNumber + i + 1,
+                    sequenceNumber + nextDataIndex + 1,
                     0,
                     data
             );
 
             sendBuffer.add(dataPacket);
+            nextDataIndex++;
         }
 
         int remainingPackets = requestedPackets - packetsToSend;

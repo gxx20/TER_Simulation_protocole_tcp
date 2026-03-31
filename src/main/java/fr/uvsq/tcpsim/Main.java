@@ -22,5 +22,12 @@ public class Main {
 
         System.out.println();
         client.requestAllData(server, 7, 3);
+
+        System.out.println();
+        client.closeConnection(server);
+
+        System.out.println();
+        System.out.println("Etat final du client : " + client.getState());
+        System.out.println("Etat final du serveur : " + server.getState());
     }
 }

@@ -10,7 +10,7 @@ import fr.uvsq.tcpsim.model.TransferRequest;
 import fr.uvsq.tcpsim.model.TransferResult;
 import fr.uvsq.tcpsim.server.TcpServer;
 
-// Classe représentant un client TCP qui peut initier des connexions, recevoir des données et envoyer des ACK/NACK en fonction de la réception des paquets
+// Classe représentant le client TCP dans la simulation
 public class TcpClient {
     private TcpState state;
     private int sequenceNumber;
@@ -19,7 +19,7 @@ public class TcpClient {
     private List<Packet> receiveBuffer;
     private List<Packet> receivedData;
 
-    // Constructeur initialisant l'état du client, les buffers et les numéros de séquence
+    // Constructeur du client TCP
     public TcpClient() {
         this.state = TcpState.CLOSED;
         this.sequenceNumber = 100;
@@ -40,9 +40,9 @@ public class TcpClient {
         return receivedData;
     }
 
-    // Méthode pour initier une connexion avec un serveur TCP en suivant le processus de handshake TCP (SYN, SYN-ACK, ACK)
+    // Méthode pour établir une connexion avec le serveur en suivant le processus de handshake TCP
     public void connect(TcpServer server) {
-        System.out.println("[CLIENT] Début de la demande de connexion.");
+        System.out.println("[CLIENT]: Début de la demande de connexion.");
 
         Packet synPacket = new Packet(
                 PacketType.SYN,
@@ -52,13 +52,13 @@ public class TcpClient {
         );
 
         state = TcpState.SYN_SENT;
-        System.out.println("[CLIENT] Envoi de SYN");
+        System.out.println("[CLIENT]: Envoi de SYN");
 
         Packet serverResponse = server.receivePacket(synPacket);
 
-        // Si le client reçoit un SYN_ACK du serveur, il répond avec un ACK pour établir la connexion
+        //si le client reçoit un SYN-ACK du serveur, il répond avec un ACK et passe à l'état ESTABLISHED, la connexion est établie
         if (serverResponse != null && serverResponse.getType() == PacketType.SYN_ACK) {
-            System.out.println("[CLIENT] Réception de SYN_ACK");
+            System.out.println("[CLIENT]: Réception de SYN_ACK");
 
             acknowledgementNumber = serverResponse.getSequenceNumber() + 1;
 
@@ -70,28 +70,28 @@ public class TcpClient {
             );
 
             state = TcpState.ESTABLISHED;
-            System.out.println("[CLIENT] Envoi de ACK");
+            System.out.println("[CLIENT]: Envoi de ACK");
 
             server.receivePacket(ackPacket);
 
-            System.out.println("[CLIENT] Connexion établie.");
-        // Si le client ne reçoit pas de SYN_ACK ou reçoit une réponse inattendue, la connexion échoue
+            System.out.println("[CLIENT]: Connexion établie.");
+        // sinon, si le client ne reçoit pas de SYN-ACK ou reçoit un paquet inattendu, la connexion échoue et le client reste en état CLOSED
         } else {
-            System.out.println("[CLIENT] Échec de l'ouverture de connexion.");
+            System.out.println("[CLIENT]: Échec de l'ouverture de connexion.");
         }
     }
 
-    // Méthode pour demander des données au serveur en fonction du nombre de paquets souhaités et de la fenêtre de réception, en traitant les paquets reçus et en envoyant des ACK/NACK en conséquence
+    // Méthode pour demander des données au serveur en fonction d'une demande de transfert
     public void requestAllData(TcpServer server, int totalPacketsRequested, int receiveWindow) {
-        // Si la connexion n'est pas établie, le client ne peut pas demander de données
+        // Vérification que la connexion est établie avant de demander des données
         if (state != TcpState.ESTABLISHED) {
-            System.out.println("[CLIENT] Impossible de demander des données : connexion non établie.");
+            System.out.println("[CLIENT]: Impossible de demander des données : connexion non établie.");
             return;
         }
 
-        // Validation des paramètres de la demande de transfert avant de commencer le processus de demande de données au serveur
+        // Validation des paramètres de la demande de transfert
         if (totalPacketsRequested <= 0 || receiveWindow <= 0) {
-            System.out.println("[CLIENT] Paramètres invalides pour le transfert.");
+            System.out.println("[CLIENT]: Paramètres invalides pour le transfert.");
             return;
         }
 
@@ -102,7 +102,7 @@ public class TcpClient {
         int remainingToRequest = totalPacketsRequested;
         int cycle = 1;
 
-        // Boucle pour demander des données au serveur tant qu'il reste des paquets à demander, en respectant la fenêtre de réception et en traitant les paquets reçus à chaque cycle
+        // Boucle de demande de données tant qu'il reste des paquets à demander
         while (remainingToRequest > 0) {
             System.out.println();
             System.out.println("========== Cycle de transfert " + cycle + " ==========");
@@ -110,14 +110,13 @@ public class TcpClient {
             receiveBuffer.clear();
 
             TransferRequest request = new TransferRequest(remainingToRequest, receiveWindow);
-            System.out.println("[CLIENT] Envoi d'une requête de transfert : " + request);
+            System.out.println("[CLIENT]: Envoi d'une requête de transfert : " + request);
 
             TransferResult result = server.sendData(request);
             List<Packet> receivedPackets = result.getSentPackets();
 
-            // Si aucun paquet n'est reçu du serveur, le client arrête le processus de transfert et affiche un message d'erreur, sinon il ajoute les paquets reçus au buffer de réception et les affiche avant de les traiter
             if (receivedPackets.isEmpty()) {
-                System.out.println("[CLIENT] Aucun paquet reçu. Arrêt du transfert.");
+                System.out.println("[CLIENT]: Aucun paquet reçu. Arrêt du transfert.");
                 break;
             }
 
@@ -125,7 +124,7 @@ public class TcpClient {
                 receiveBuffer.add(packet);
             }
 
-            System.out.println("[CLIENT] Paquets reçus dans le buffer de réception :");
+            System.out.println("[CLIENT]: Paquets reçus dans le buffer de réception :");
             for (Packet packet : receiveBuffer) {
                 System.out.println("    " + packet);
             }
@@ -133,51 +132,94 @@ public class TcpClient {
             processReceivedPackets(server);
 
             remainingToRequest = result.getRemainingPackets();
-            System.out.println("[CLIENT] Nombre de paquets restant à demander : " + remainingToRequest);
+            System.out.println("[CLIENT]: Nombre de paquets restant à demander : " + remainingToRequest);
 
             cycle++;
         }
 
         System.out.println();
-        System.out.println("[CLIENT] Transfert terminé.");
-        System.out.println("[CLIENT] Données totales reçues :");
+        System.out.println("[CLIENT]: Transfert terminé.");
+        System.out.println("[CLIENT]: Données totales reçues :");
         for (Packet packet : receivedData) {
             System.out.println("    " + packet);
         }
     }
 
-    // Méthode pour analyser les paquets reçus dans le buffer de réception, envoyer des ACK pour les paquets non corrompus et des NACK pour les paquets corrompus, et gérer les retransmissions en fonction des réponses du serveur
+    // Méthode pour analyser les paquets reçus, envoyer des ACK pour les paquets corrects et des NACK pour les paquets corrompus, et demander des retransmissions si nécessaire
     private void processReceivedPackets(TcpServer server) {
         if (receiveBuffer.isEmpty()) {
-            System.out.println("[CLIENT] Aucun paquet reçu, aucun ACK/NACK envoyé.");
+            System.out.println("[CLIENT]: Aucun paquet reçu, aucun ACK/NACK envoyé.");
             return;
         }
 
-        System.out.println("[CLIENT] Analyse des paquets reçus :");
+        System.out.println("[CLIENT]: Analyse des paquets reçus :");
 
-        // Pour chaque paquet reçu, le client vérifie s'il est corrompu ou non, envoie un ACK pour les paquets non corrompus et un NACK pour les paquets corrompus, et gère les retransmissions en fonction des réponses du serveur
+        // Parcours des paquets reçus pour déterminer les ACK/NACK à envoyer
         for (Packet packet : receiveBuffer) {
-            // Si le paquet n'est pas corrompu, le client envoie un ACK pour le paquet et l'ajoute aux données reçues, sinon il envoie un NACK et demande une retransmission du paquet spécifique au serveur, en vérifiant que la retransmission réussit et que le paquet retransmis n'est plus corrompu avant de l'ajouter aux données reçues
             if (!packet.isCorrupted()) {
-                System.out.println("    ACK pour le paquet de séquence " + packet.getSequenceNumber());
+                System.out.println("ACK pour le paquet de séquence " + packet.getSequenceNumber());
                 receivedData.add(packet);
-            // Si le paquet est corrompu, le client envoie un NACK et demande une retransmission du paquet spécifique au serveur, en vérifiant que la retransmission réussit et que le paquet retransmis n'est plus corrompu avant de l'ajouter aux données reçues
             } else {
-                System.out.println("    NACK pour le paquet de séquence " + packet.getSequenceNumber());
+                System.out.println("NACK pour le paquet de séquence " + packet.getSequenceNumber());
 
                 Packet retransmittedPacket = server.retransmitPacket(packet.getSequenceNumber());
 
-                // Si la retransmission réussit et que le paquet retransmis n'est plus corrompu, le client envoie un ACK pour le paquet retransmis et l'ajoute aux données reçues, sinon il affiche un message d'erreur pour indiquer l'échec de la retransmission
                 if (retransmittedPacket != null && !retransmittedPacket.isCorrupted()) {
-                    System.out.println("    ACK après retransmission pour le paquet de séquence "
+                    System.out.println("ACK après retransmission pour le paquet de séquence "
                             + retransmittedPacket.getSequenceNumber());
                     receivedData.add(retransmittedPacket);
-                // Si la retransmission échoue ou que le paquet retransmis est toujours corrompu, le client affiche un message d'erreur pour indiquer l'échec de la retransmission
                 } else {
-                    System.out.println("    Échec de retransmission pour le paquet de séquence "
+                    System.out.println("Échec de retransmission pour le paquet de séquence "
                             + packet.getSequenceNumber());
                 }
             }
+        }
+    }
+
+    // Méthode pour fermer la connexion avec le serveur en suivant le processus de fermeture TCP
+    public void closeConnection(TcpServer server) {
+        if (state != TcpState.ESTABLISHED) {
+            System.out.println("[CLIENT]: Impossible de fermer : connexion non établie.");
+            return;
+        }
+
+        System.out.println();
+        System.out.println("[CLIENT]: Début de la fermeture de connexion.");
+
+        Packet finPacket = new Packet(
+                PacketType.FIN,
+                sequenceNumber + 999,
+                0,
+                null
+        );
+
+        state = TcpState.FIN_WAIT;
+        System.out.println("[CLIENT]: Envoi de FIN");
+
+        Packet serverResponse = server.receivePacket(finPacket);
+
+        //si le client reçoit un FIN-ACK du serveur, il répond avec un ACK final, passe à l'état TIME_WAIT, temporise pour permettre au serveur de recevoir le ACK final, puis passe à l'état CLOSED, la connexion est fermée
+        if (serverResponse != null && serverResponse.getType() == PacketType.FIN_ACK) {
+            System.out.println("[CLIENT]: Réception de FIN_ACK");
+
+            Packet finalAck = new Packet(
+                    PacketType.ACK,
+                    finPacket.getSequenceNumber() + 1,
+                    serverResponse.getSequenceNumber() + 1,
+                    null
+            );
+
+            System.out.println("[CLIENT]: Envoi du ACK final");
+            server.receivePacket(finalAck);
+
+            state = TcpState.TIME_WAIT;
+            System.out.println("[CLIENT]: Passage à TIME_WAIT");
+
+            System.out.println("[CLIENT]: Temporisation de fin de connexion...");
+            state = TcpState.CLOSED;
+            System.out.println("[CLIENT]: Connexion fermée.");
+        } else {
+            System.out.println("[CLIENT]: Échec de la fermeture de connexion.");
         }
     }
 }

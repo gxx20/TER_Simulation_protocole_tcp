@@ -154,6 +154,30 @@ Ou, si tu veux lancer les tests en même temps :
 mvn test
 ```
 
+## Générer un JAR exécutable
+
+Pour créer un fichier JAR exécutable :
+
+```bash
+mvn package
+```
+
+Le JAR sera dans `target/` (ex : `target/tcp-simulation-1.0-SNAPSHOT.jar`). Lancer :
+
+```bash
+java -jar target/tcp-simulation-1.0-SNAPSHOT.jar
+```
+
+## Formatage et style
+
+Pour vérifier le style :
+
+```bash
+mvn checkstyle:checkstyle
+```
+
+Si tu veux que j'applique un formatage automatique, je peux exécuter `google-java-format` sur le code ou ajouter Spotless/Formatter au `pom.xml` et exécuter `mvn spotless:apply` — indique ta préférence.
+
 ## Remarques
 
 - Ce projet simule le comportement de TCP, mais n'utilise pas le réseau réel.

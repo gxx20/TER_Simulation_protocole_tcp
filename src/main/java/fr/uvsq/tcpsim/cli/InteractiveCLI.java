@@ -1,9 +1,11 @@
 package fr.uvsq.tcpsim.cli;
 
-import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.Scanner;
 
 import fr.uvsq.tcpsim.client.TcpClient;
@@ -72,16 +74,19 @@ public class InteractiveCLI {
                         if (summary == null) {
                             System.out.println("Aucun résumé disponible, export annulé.");
                         } else {
-                            Path out = Path.of(config.getExportPath());
+                            Path out = Paths.get(config.getExportPath());
                             String header = fr.uvsq.tcpsim.model.TransferSummary.csvHeader();
                             String row = summary.toCsvRow();
                             if (out.getParent() != null) {
                                 Files.createDirectories(out.getParent());
                             }
-                            if (!Files.exists(out)) {
-                                Files.writeString(out, header + System.lineSeparator(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-                            }
-                            Files.writeString(out, row + System.lineSeparator(), StandardOpenOption.APPEND);
+                            Files.write(
+                                    out,
+                                    Arrays.asList(header, row),
+                                    StandardCharsets.UTF_8,
+                                    StandardOpenOption.CREATE,
+                                    StandardOpenOption.TRUNCATE_EXISTING,
+                                    StandardOpenOption.WRITE);
                             System.out.println("Exporté vers " + out.toAbsolutePath());
                         }
                     } catch (Exception ex) {

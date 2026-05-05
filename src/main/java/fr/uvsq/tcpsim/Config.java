@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 public class Config {
@@ -14,7 +15,7 @@ public class Config {
     private String exportPath = "transfer_summary.csv";
 
     public Config() {
-        Path p = Path.of("config.properties");
+        Path p = Paths.get("config.properties");
         if (Files.exists(p)) {
             Properties props = new Properties();
             try (FileInputStream in = new FileInputStream(p.toFile())) {
@@ -30,9 +31,23 @@ public class Config {
         }
     }
 
-    public double getCorruptionProbability() { return corruptionProbability; }
-    public double getLossProbability() { return lossProbability; }
-    public int getDefaultPackets() { return defaultPackets; }
-    public int getDefaultWindow() { return defaultWindow; }
-    public String getExportPath() { return exportPath; }
+    public double getCorruptionProbability() {
+        return corruptionProbability;
+    }
+
+    public double getLossProbability() {
+        return lossProbability;
+    }
+
+    public int getDefaultPackets() {
+        return defaultPackets;
+    }
+
+    public int getDefaultWindow() {
+        return defaultWindow;
+    }
+
+    public String getExportPath() {
+        return exportPath;
+    }
 }

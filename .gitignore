@@ -29,3 +29,7 @@ target/
 .vscode/
 .DS_Store
 .ds_store
+
+# Local generated outputs
+transfer_summary.csv
+TER_2526_Réseaux - Simulation protocole TCP.MG.pdf

@@ -87,7 +87,7 @@ public class TcpGui {
         JScrollPane logScroll = new JScrollPane(output);
         logScroll.setBorder(createBorderTitle("Console de simulation"));
 
-        JLabel statusValue = createMetricValue("Prêt");
+        JLabel statusValue = createMetricValue("Prâ”œÂ¬t");
         JLabel packetsValue = createMetricValue("-");
         JLabel summaryValue = createMetricValue("-");
         JLabel corruptionValue = createMetricValue("-");
@@ -103,7 +103,7 @@ public class TcpGui {
         JTextField corruptionField = new JTextField(String.valueOf(config.getCorruptionProbability()), 8);
         JTextField lossField = new JTextField(String.valueOf(config.getLossProbability()), 8);
 
-        JComboBox<String> presetBox = new JComboBox<>(new String[]{"Défaut", "Rapide", "Fiabilité élevée", "Stress"});
+        JComboBox<String> presetBox = new JComboBox<>(new String[]{"Dâ”œÂ®faut", "Rapide", "Fiabilitâ”œÂ® â”œÂ®levâ”œÂ®e", "Stress"});
 
         JButton runBtn = primaryButton("Lancer");
         JButton stopBtn = secondaryButton("Stop");
@@ -112,17 +112,17 @@ public class TcpGui {
         stopBtn.setEnabled(false);
 
         JPanel metricsPanel = new JPanel(new GridBagLayout());
-        metricsPanel.setBorder(createBorderTitle("Résumé"));
+        metricsPanel.setBorder(createBorderTitle("Râ”œÂ®sumâ”œÂ®"));
         metricsPanel.setBackground(PANEL_BG);
 
-        addMetric(metricsPanel, 0, 0, "État", statusValue);
-        addMetric(metricsPanel, 1, 0, "Paquets reçus", packetsValue);
+        addMetric(metricsPanel, 0, 0, "â”œÃ«tat", statusValue);
+        addMetric(metricsPanel, 1, 0, "Paquets reâ”œÂºus", packetsValue);
         addMetric(metricsPanel, 2, 0, "Cycles", summaryValue);
         addMetric(metricsPanel, 0, 1, "Corruptions", corruptionValue);
         addMetric(metricsPanel, 1, 1, "Pertes", lossValue);
 
         JPanel formPanel = new JPanel(new GridBagLayout());
-        formPanel.setBorder(createBorderTitle("Paramètres de simulation"));
+        formPanel.setBorder(createBorderTitle("Paramâ”œÂ¿tres de simulation"));
         formPanel.setBackground(PANEL_BG);
 
         GridBagConstraints c = new GridBagConstraints();
@@ -130,19 +130,19 @@ public class TcpGui {
         c.fill = GridBagConstraints.HORIZONTAL;
         c.gridx = 0;
         c.gridy = 0;
-        formPanel.add(new JLabel("Préréglage"), c);
+        formPanel.add(new JLabel("Prâ”œÂ®râ”œÂ®glage"), c);
         c.gridx = 1;
         formPanel.add(presetBox, c);
 
         c.gridy++;
         c.gridx = 0;
-        formPanel.add(new JLabel("Paquets demandés"), c);
+        formPanel.add(new JLabel("Paquets demandâ”œÂ®s"), c);
         c.gridx = 1;
         formPanel.add(packetsField, c);
 
         c.gridy++;
         c.gridx = 0;
-        formPanel.add(new JLabel("Fenêtre de réception"), c);
+        formPanel.add(new JLabel("Fenâ”œÂ¬tre de râ”œÂ®ception"), c);
         c.gridx = 1;
         formPanel.add(windowField, c);
 
@@ -196,7 +196,7 @@ public class TcpGui {
             exportBtn.setEnabled(false);
             output.setText("");
             progressBar.setValue(0);
-            statusValue.setText("Exécution...");
+            statusValue.setText("Exâ”œÂ®cution...");
 
             PrintStream originalOut = System.out;
             previousOutRef.set(originalOut);
@@ -231,7 +231,7 @@ public class TcpGui {
                             summaryValue.setText(String.valueOf(summary.getCycles()));
                             corruptionValue.setText(String.valueOf(summary.getCorruptedPacketsDetected()));
                             lossValue.setText(String.valueOf(loss));
-                            statusValue.setText(summary.isCompleted() ? "Terminé" : "Interrompu");
+                            statusValue.setText(summary.isCompleted() ? "Terminâ”œÂ®" : "Interrompu");
                             progressBar.setValue(summary.isCompleted() ? 100 : progressBar.getValue());
                             exportBtn.setEnabled(true);
                         }
@@ -256,8 +256,8 @@ public class TcpGui {
             TcpClient client = clientRef.get();
             if (client != null) {
                 client.cancelTransfer();
-                appendLine(output, "Interruption demandée. Le client va s'arrêter.");
-                statusValue.setText("Arrêt demandé");
+                appendLine(output, "Interruption demandâ”œÂ®e. Le client va s'arrâ”œÂ¬ter.");
+                statusValue.setText("Arrâ”œÂ¬t demandâ”œÂ®");
             } else {
                 appendLine(output, "Aucune simulation active.");
             }
@@ -266,7 +266,7 @@ public class TcpGui {
         exportBtn.addActionListener((ActionEvent e) -> {
             TransferSummary summary = lastSummaryRef.get();
             if (summary == null) {
-                appendLine(output, "Aucun résumé disponible pour l'export.");
+                appendLine(output, "Aucun râ”œÂ®sumâ”œÂ® disponible pour l'export.");
                 return;
             }
 
@@ -276,7 +276,7 @@ public class TcpGui {
                     Files.writeString(out, TransferSummary.csvHeader() + System.lineSeparator(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
                 }
                 Files.writeString(out, summary.toCsvRow() + System.lineSeparator(), StandardOpenOption.APPEND);
-                appendLine(output, "Résumé exporté vers : " + out.toAbsolutePath());
+                appendLine(output, "Râ”œÂ®sumâ”œÂ® exportâ”œÂ® vers : " + out.toAbsolutePath());
             } catch (Exception ex) {
                 ex.printStackTrace();
                 appendLine(output, "Erreur lors de l'export CSV.");
@@ -299,7 +299,7 @@ public class TcpGui {
             windowField.setText("2");
             corruptionField.setText("0.15");
             lossField.setText("0.0");
-        } else if ("Fiabilité élevée".equals(preset)) {
+        } else if ("Fiabilitâ”œÂ® â”œÂ®levâ”œÂ®e".equals(preset)) {
             packetsField.setText("8");
             windowField.setText("3");
             corruptionField.setText("0.05");

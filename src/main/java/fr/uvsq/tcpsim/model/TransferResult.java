@@ -2,18 +2,18 @@ package fr.uvsq.tcpsim.model;
 
 import java.util.List;
 
-// Classe représentant le résultat d'un transfert de données, contenant les paquets envoyés et le nombre de paquets restants à envoyer
+// Classe reprâ”œÂ®sentant le râ”œÂ®sultat d'un transfert de donnâ”œÂ®es, contenant les paquets envoyâ”œÂ®s et le nombre de paquets restants â”œÃ¡ envoyer
 public class TransferResult {
     private List<Packet> sentPackets;
     private int remainingPackets;
 
-    // Constructeur pour initialiser les paquets envoyés et le nombre de paquets restants
+    // Constructeur pour initialiser les paquets envoyâ”œÂ®s et le nombre de paquets restants
     public TransferResult(List<Packet> sentPackets, int remainingPackets) {
         this.sentPackets = sentPackets;
         this.remainingPackets = remainingPackets;
     }
 
-    // Getters et setters pour les paquets envoyés
+    // Getters et setters pour les paquets envoyâ”œÂ®s
     public List<Packet> getSentPackets() {
         return sentPackets;
     }

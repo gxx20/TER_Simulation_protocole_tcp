@@ -28,26 +28,26 @@ public class InteractiveCLI {
 
             String choice = readLineOrNull(scanner);
             if (choice == null) {
-                System.out.println("Entrée fermée. Arrêt du programme.");
+                System.out.println("Entrâ”œÂ®e fermâ”œÂ®e. Arrâ”œÂ¬t du programme.");
                 break;
             }
 
             if (choice.equals("1")) {
                 fr.uvsq.tcpsim.Config config = new fr.uvsq.tcpsim.Config();
 
-                System.out.print("Nombre total de paquets à demander (défaut " + config.getDefaultPackets() + "): ");
+                System.out.print("Nombre total de paquets â”œÃ¡ demander (dâ”œÂ®faut " + config.getDefaultPackets() + "): ");
                 String tp = readLineOrDefault(scanner, "");
                 int total = tp.isEmpty() ? config.getDefaultPackets() : parsePositiveInt(tp, config.getDefaultPackets());
 
-                System.out.print("Taille de la fenêtre de réception (défaut " + config.getDefaultWindow() + "): ");
+                System.out.print("Taille de la fenâ”œÂ¬tre de râ”œÂ®ception (dâ”œÂ®faut " + config.getDefaultWindow() + "): ");
                 String rw = readLineOrDefault(scanner, "");
                 int window = rw.isEmpty() ? config.getDefaultWindow() : parsePositiveInt(rw, config.getDefaultWindow());
 
-                System.out.print("Probabilité de corruption (0.0-1.0, défaut " + config.getCorruptionProbability() + "): ");
+                System.out.print("Probabilitâ”œÂ® de corruption (0.0-1.0, dâ”œÂ®faut " + config.getCorruptionProbability() + "): ");
                 String cp = readLineOrDefault(scanner, "");
                 double corruption = cp.isEmpty() ? config.getCorruptionProbability() : parseProbability(cp, config.getCorruptionProbability());
 
-                System.out.print("Probabilité de perte (0.0-1.0, défaut " + config.getLossProbability() + "): ");
+                System.out.print("Probabilitâ”œÂ® de perte (0.0-1.0, dâ”œÂ®faut " + config.getLossProbability() + "): ");
                 String lp = readLineOrDefault(scanner, "");
                 double loss = lp.isEmpty() ? config.getLossProbability() : parseProbability(lp, config.getLossProbability());
 
@@ -55,22 +55,22 @@ public class InteractiveCLI {
                 TcpServer server = new TcpServer(corruption, loss);
 
                 System.out.println();
-                System.out.println("--- Démarrage de la simulation ---");
+                System.out.println("--- Dâ”œÂ®marrage de la simulation ---");
                 client.connect(server);
                 TransferSummary summary = client.requestAllData(server, total, window);
                 client.closeConnection(server);
 
                 System.out.println();
-                System.out.println("--- Résumé ---");
-                System.out.println(summary == null ? "Aucun résumé disponible." : summary);
+                System.out.println("--- Râ”œÂ®sumâ”œÂ® ---");
+                System.out.println(summary == null ? "Aucun râ”œÂ®sumâ”œÂ® disponible." : summary);
                 System.out.println("--- Fin ---");
 
-                System.out.print("Exporter le résumé en CSV ? (o/N): ");
+                System.out.print("Exporter le râ”œÂ®sumâ”œÂ® en CSV ? (o/N): ");
                 String exp = readLineOrDefault(scanner, "").trim().toLowerCase();
                 if (exp.equals("o") || exp.equals("y")) {
                     try {
                         if (summary == null) {
-                            System.out.println("Aucun résumé disponible, export annulé.");
+                            System.out.println("Aucun râ”œÂ®sumâ”œÂ® disponible, export annulâ”œÂ®.");
                         } else {
                             Path out = Path.of(config.getExportPath());
                             String header = fr.uvsq.tcpsim.model.TransferSummary.csvHeader();
@@ -82,7 +82,7 @@ public class InteractiveCLI {
                                 Files.writeString(out, header + System.lineSeparator(), StandardOpenOption.CREATE, StandardOpenOption.WRITE);
                             }
                             Files.writeString(out, row + System.lineSeparator(), StandardOpenOption.APPEND);
-                            System.out.println("Exporté vers " + out.toAbsolutePath());
+                            System.out.println("Exportâ”œÂ® vers " + out.toAbsolutePath());
                         }
                     } catch (Exception ex) {
                         ex.printStackTrace();

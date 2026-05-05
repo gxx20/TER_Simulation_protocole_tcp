@@ -12,7 +12,7 @@ public class Main {
 
         int totalPacketsRequested = args != null && args.length > 0 ? parseArgument(args, 0, config.getDefaultPackets()) : config.getDefaultPackets();
         int receiveWindow = args != null && args.length > 1 ? parseArgument(args, 1, config.getDefaultWindow()) : config.getDefaultWindow();
-        System.out.println("Paramâ”œÂ¿tres de transfert : " + totalPacketsRequested + " paquet(s), fenâ”œÂ¬tre=" + receiveWindow);
+        System.out.println("Paramètres de transfert : " + totalPacketsRequested + " paquet(s), fenêtre=" + receiveWindow);
 
         TcpClient client = new TcpClient();
         TcpServer server = new TcpServer(config.getCorruptionProbability(), config.getLossProbability());
@@ -24,8 +24,8 @@ public class Main {
         client.connect(server);
 
         System.out.println();
-        System.out.println("Etat aprâ”œÂ¿s ouverture - client : " + client.getState());
-        System.out.println("Etat aprâ”œÂ¿s ouverture - serveur : " + server.getState());
+        System.out.println("Etat après ouverture - client : " + client.getState());
+        System.out.println("Etat après ouverture - serveur : " + server.getState());
 
         System.out.println();
         TransferSummary summary = client.requestAllData(server, totalPacketsRequested, receiveWindow);
@@ -46,7 +46,7 @@ public class Main {
         try {
             return Integer.parseInt(args[index]);
         } catch (NumberFormatException exception) {
-            System.out.println("Argument invalide â”œÃ¡ l'index " + index + ", valeur par dâ”œÂ®faut utilisâ”œÂ®e : " + defaultValue);
+            System.out.println("Argument invalide à l'index " + index + ", valeur par défaut utilisée : " + defaultValue);
             return defaultValue;
         }
     }

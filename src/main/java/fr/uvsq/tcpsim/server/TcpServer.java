@@ -10,7 +10,7 @@ import fr.uvsq.tcpsim.model.TcpState;
 import fr.uvsq.tcpsim.model.TransferRequest;
 import fr.uvsq.tcpsim.model.TransferResult;
 
-/// Classe reprâ”œÂ®sentant le serveur TCP dans la simulation
+/// Classe représentant le serveur TCP dans la simulation
 public class TcpServer {
     private TcpState state;
     private int sequenceNumber;
@@ -42,7 +42,7 @@ public class TcpServer {
         initializeSourceData();
     }
 
-    // Initialisation de la mâ”œÂ®moire source avec des donnâ”œÂ®es fictives
+    // Initialisation de la mémoire source avec des données fictives
     private void initializeSourceData() {
         sourceData.add("Bloc-1");
         sourceData.add("Bloc-2");
@@ -58,11 +58,11 @@ public class TcpServer {
         return state;
     }
 
-    // Mâ”œÂ®thode pour recevoir un paquet du client et râ”œÂ®pondre en fonction de l'â”œÂ®tat actuel du serveur
+    // Méthode pour recevoir un paquet du client et répondre en fonction de l'état actuel du serveur
     public Packet receivePacket(Packet packet) {
-        System.out.println("[SERVEUR] Paquet reâ”œÂºu : " + packet);
+        System.out.println("[SERVEUR] Paquet reçu : " + packet);
 
-        //si le serveur est en â”œÂ®coute et reâ”œÂºoit un SYN, il râ”œÂ®pond avec un SYN-ACK et passe â”œÃ¡ l'â”œÂ®tat SYN_RECEIVED
+        //si le serveur est en écoute et reçoit un SYN, il répond avec un SYN-ACK et passe à l'état SYN_RECEIVED
         if (state == TcpState.LISTEN && packet.getType() == PacketType.SYN) {
             acknowledgementNumber = packet.getSequenceNumber() + 1;
             state = TcpState.SYN_RECEIVED;
@@ -78,14 +78,14 @@ public class TcpServer {
             return response;
         }
 
-        //si le serveur est en SYN_RECEIVED et reâ”œÂºoit un ACK, il passe â”œÃ¡ l'â”œÂ®tat ESTABLISHED et la connexion est â”œÂ®tablie
+        //si le serveur est en SYN_RECEIVED et reçoit un ACK, il passe à l'état ESTABLISHED et la connexion est établie
         if (state == TcpState.SYN_RECEIVED && packet.getType() == PacketType.ACK) {
             state = TcpState.ESTABLISHED;
-            System.out.println("[SERVEUR] Connexion â”œÂ®tablie.");
+            System.out.println("[SERVEUR] Connexion établie.");
             return null;
         }
 
-        //si le serveur est en ESTABLISHED et reâ”œÂºoit un FIN, il râ”œÂ®pond avec un FIN-ACK et passe â”œÃ¡ l'â”œÂ®tat CLOSE_WAIT
+        //si le serveur est en ESTABLISHED et reçoit un FIN, il répond avec un FIN-ACK et passe à l'état CLOSE_WAIT
         if (state == TcpState.ESTABLISHED && packet.getType() == PacketType.FIN) {
             acknowledgementNumber = packet.getSequenceNumber() + 1;
             state = TcpState.CLOSE_WAIT;
@@ -97,20 +97,20 @@ public class TcpServer {
                     null
             );
 
-            System.out.println("[SERVEUR] Râ”œÂ®ception de FIN, passage â”œÃ¡ CLOSE_WAIT");
+            System.out.println("[SERVEUR] Réception de FIN, passage à CLOSE_WAIT");
             System.out.println("[SERVEUR] Envoi de FIN_ACK");
             state = TcpState.LAST_ACK;
             return response;
         }
 
-        //si le serveur est en LAST_ACK et reâ”œÂºoit un ACK, il passe â”œÃ¡ l'â”œÂ®tat CLOSED et la connexion est fermâ”œÂ®e
+        //si le serveur est en LAST_ACK et reçoit un ACK, il passe à l'état CLOSED et la connexion est fermée
         if (state == TcpState.LAST_ACK && packet.getType() == PacketType.ACK) {
             state = TcpState.CLOSED;
-            System.out.println("[SERVEUR] ACK final reâ”œÂºu. Connexion fermâ”œÂ®e.");
+            System.out.println("[SERVEUR] ACK final reçu. Connexion fermée.");
             return null;
         }
 
-        System.out.println("[SERVEUR] Paquet inattendu dans l'â”œÂ®tat " + state);
+        System.out.println("[SERVEUR] Paquet inattendu dans l'état " + state);
         return null;
     }
 
@@ -118,10 +118,10 @@ public class TcpServer {
         this.nextDataIndex = 0;
     }
 
-    // Mâ”œÂ®thode pour envoyer des donnâ”œÂ®es au client en fonction de la demande de transfert
+    // Méthode pour envoyer des données au client en fonction de la demande de transfert
     public TransferResult sendData(TransferRequest request) {
         if (state != TcpState.ESTABLISHED) {
-            System.out.println("[SERVEUR] Impossible d'envoyer des donnâ”œÂ®es : connexion non â”œÂ®tablie.");
+            System.out.println("[SERVEUR] Impossible d'envoyer des données : connexion non établie.");
             return new TransferResult(new ArrayList<>(), request.getNumberOfPacketsRequested());
         }
 
@@ -134,11 +134,11 @@ public class TcpServer {
         int packetsToSend = Math.min(requestedPackets, receiveWindow);
         packetsToSend = Math.min(packetsToSend, availablePackets);
 
-        System.out.println("[SERVEUR] Demande reâ”œÂºue : " + request);
-        System.out.println("[SERVEUR] Index courant dans la mâ”œÂ®moire source : " + nextDataIndex);
-        System.out.println("[SERVEUR] Nombre de paquets pouvant â”œÂ¬tre envoyâ”œÂ®s maintenant : " + packetsToSend);
+        System.out.println("[SERVEUR] Demande reçue : " + request);
+        System.out.println("[SERVEUR] Index courant dans la mémoire source : " + nextDataIndex);
+        System.out.println("[SERVEUR] Nombre de paquets pouvant être envoyés maintenant : " + packetsToSend);
 
-        // Gâ”œÂ®nâ”œÂ®ration des paquets de donnâ”œÂ®es â”œÃ¡ envoyer
+        // Génération des paquets de données à envoyer
         for (int i = 0; i < packetsToSend; i++) {
             String data = sourceData.get(nextDataIndex);
 
@@ -170,7 +170,7 @@ public class TcpServer {
             remainingPackets = 0;
         }
 
-        System.out.println("[SERVEUR] Paquets placâ”œÂ®s dans le buffer d'envoi :");
+        System.out.println("[SERVEUR] Paquets placés dans le buffer d'envoi :");
         for (Packet packet : sendBuffer) {
             System.out.println("    " + packet);
         }
@@ -178,13 +178,13 @@ public class TcpServer {
         return new TransferResult(new ArrayList<>(sendBuffer), remainingPackets);
     }
 
-    // Mâ”œÂ®thode pour retransmettre un paquet spâ”œÂ®cifique en cas de perte ou de corruption
+    // Méthode pour retransmettre un paquet spécifique en cas de perte ou de corruption
     public Packet retransmitPacket(int sequenceNumberToRetransmit) {
         int sourceIndex = sequenceNumberToRetransmit - sequenceNumber - 1;
 
-        // Vâ”œÂ®rification que le numâ”œÂ®ro de sâ”œÂ®quence â”œÃ¡ retransmettre correspond â”œÃ¡ un paquet valide dans la mâ”œÂ®moire source
+        // Vérification que le numéro de séquence à retransmettre correspond à un paquet valide dans la mémoire source
         if (sourceIndex < 0 || sourceIndex >= sourceData.size()) {
-            System.out.println("[SERVEUR] Impossible de retransmettre : numâ”œÂ®ro de sâ”œÂ®quence invalide.");
+            System.out.println("[SERVEUR] Impossible de retransmettre : numéro de séquence invalide.");
             return null;
         }
 

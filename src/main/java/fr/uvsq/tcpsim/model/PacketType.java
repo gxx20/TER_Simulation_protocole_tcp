@@ -6,8 +6,8 @@ public enum PacketType {
     SYN, /* ouverture */
     SYN_ACK, /* ouverture + confirmation */
     ACK, /* confirmation */
-    DATA, /* donnâ”œÂ®es */
+    DATA, /* données */
     FIN, /* fermeture */
     FIN_ACK, /* fermeture + confirmation */
-    NACK /* nâ”œÂ®gative acknowledgment */
+    NACK /* négative acknowledgment */
 }

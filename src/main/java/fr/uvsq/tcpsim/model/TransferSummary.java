@@ -1,6 +1,6 @@
 package fr.uvsq.tcpsim.model;
 
-// Râ”œÂ®sumâ”œÂ® global d'un transfert de donnâ”œÂ®es dans la simulation TCP.
+// Résumé global d'un transfert de données dans la simulation TCP.
 public class TransferSummary {
     private final int requestedPackets;
     private final int receivedPackets;

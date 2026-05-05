@@ -1,6 +1,6 @@
 package fr.uvsq.tcpsim.model;
 
-/* Classe reprâ”œÂ®sentant une demande de transfert de donnâ”œÂ®es */
+/* Classe représentant une demande de transfert de données */
 public class TransferRequest {
     private int numberOfPacketsRequested;
     private int receiveWindow;
@@ -11,7 +11,7 @@ public class TransferRequest {
         this.receiveWindow = receiveWindow;
     }
 
-    /* Getter pour le nombre de paquets demandâ”œÂ®s */
+    /* Getter pour le nombre de paquets demandés */
     public int getNumberOfPacketsRequested() {
         return numberOfPacketsRequested;
     }
@@ -20,7 +20,7 @@ public class TransferRequest {
         this.numberOfPacketsRequested = numberOfPacketsRequested;
     }
 
-    /* Getter pour la fenâ”œÂ¬tre de râ”œÂ®ception */
+    /* Getter pour la fenêtre de réception */
     public int getReceiveWindow() {
         return receiveWindow;
     }

@@ -1,6 +1,6 @@
 package fr.uvsq.tcpsim.model;
 
-/* Classe reprâ”œÂ®sentant un paquet dans le protocole TCP */
+/* Classe représentant un paquet dans le protocole TCP */
 public class Packet {
     private PacketType type;
     private int sequenceNumber;
@@ -26,7 +26,7 @@ public class Packet {
         this.type = type;
     }
 
-    /* Le numâ”œÂ®ro de sâ”œÂ®quence est utilisâ”œÂ® pour ordonner les paquets et dâ”œÂ®tecter les pertes */
+    /* Le numéro de séquence est utilisé pour ordonner les paquets et détecter les pertes */
     public int getSequenceNumber() {
         return sequenceNumber;
     }
@@ -35,7 +35,7 @@ public class Packet {
         this.sequenceNumber = sequenceNumber;
     }
 
-    /* Le numâ”œÂ®ro d'acquittement est utilisâ”œÂ® pour confirmer la râ”œÂ®ception des paquets */
+    /* Le numéro d'acquittement est utilisé pour confirmer la réception des paquets */
     public int getAcknowledgementNumber() {
         return acknowledgementNumber;
     }
@@ -44,7 +44,7 @@ public class Packet {
         this.acknowledgementNumber = acknowledgementNumber;
     }
 
-    /* Le payload contient les donnâ”œÂ®es transportâ”œÂ®es par le paquet */
+    /* Le payload contient les données transportées par le paquet */
     public String getPayload() {
         return payload;
     }

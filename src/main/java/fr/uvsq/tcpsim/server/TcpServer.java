@@ -2,6 +2,7 @@ package fr.uvsq.tcpsim.server;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import fr.uvsq.tcpsim.model.Packet;
 import fr.uvsq.tcpsim.model.PacketType;
@@ -14,6 +15,9 @@ public class TcpServer {
     private TcpState state;
     private int sequenceNumber;
     private int acknowledgementNumber;
+    private double corruptionProbability;
+    private double lossProbability;
+    private final Random random;
 
     private List<String> sourceData;
     private List<Packet> sendBuffer;
@@ -21,12 +25,19 @@ public class TcpServer {
 
     // Constructeur du serveur TCP
     public TcpServer() {
+        this(0.25, 0.0);
+    }
+
+    public TcpServer(double corruptionProbability, double lossProbability) {
         this.state = TcpState.LISTEN;
         this.sequenceNumber = 500;
         this.acknowledgementNumber = 0;
         this.sourceData = new ArrayList<>();
         this.sendBuffer = new ArrayList<>();
         this.nextDataIndex = 0;
+        this.corruptionProbability = corruptionProbability;
+        this.lossProbability = lossProbability;
+        this.random = new Random();
 
         initializeSourceData();
     }
@@ -138,9 +149,17 @@ public class TcpServer {
                     data
             );
 
-            if (dataPacket.getSequenceNumber() % 2 == 0) {
-                dataPacket.setCorrupted(true);
+            // Simulate loss
+            boolean lost = random.nextDouble() < lossProbability;
+            if (lost) {
+                // do not add packet to send buffer (simulates loss)
+                nextDataIndex++;
+                continue;
             }
+
+            // Simulate corruption
+            boolean corrupted = random.nextDouble() < corruptionProbability;
+            dataPacket.setCorrupted(corrupted);
 
             sendBuffer.add(dataPacket);
             nextDataIndex++;

@@ -8,7 +8,10 @@ import fr.uvsq.tcpsim.model.PacketType;
 import fr.uvsq.tcpsim.model.TcpState;
 import fr.uvsq.tcpsim.model.TransferRequest;
 import fr.uvsq.tcpsim.model.TransferResult;
+import fr.uvsq.tcpsim.model.TransferSummary;
 import fr.uvsq.tcpsim.server.TcpServer;
+
+import fr.uvsq.tcpsim.client.TransferListener;
 
 // Classe représentant le client TCP dans la simulation
 public class TcpClient {
@@ -18,6 +21,11 @@ public class TcpClient {
 
     private List<Packet> receiveBuffer;
     private List<Packet> receivedData;
+    private TransferSummary lastTransferSummary;
+    private int transferCorruptedPacketsDetected;
+    private int transferRetransmissionsPerformed;
+    private volatile boolean canceled = false;
+    private TransferListener transferListener;
 
     // Constructeur du client TCP
     public TcpClient() {
@@ -38,6 +46,10 @@ public class TcpClient {
 
     public List<Packet> getReceivedData() {
         return receivedData;
+    }
+
+    public TransferSummary getLastTransferSummary() {
+        return lastTransferSummary;
     }
 
     // Méthode pour établir une connexion avec le serveur en suivant le processus de handshake TCP
@@ -82,28 +94,32 @@ public class TcpClient {
     }
 
     // Méthode pour demander des données au serveur en fonction d'une demande de transfert
-    public void requestAllData(TcpServer server, int totalPacketsRequested, int receiveWindow) {
+    public TransferSummary requestAllData(TcpServer server, int totalPacketsRequested, int receiveWindow) {
         // Vérification que la connexion est établie avant de demander des données
         if (state != TcpState.ESTABLISHED) {
             System.out.println("[CLIENT]: Impossible de demander des données : connexion non établie.");
-            return;
+            lastTransferSummary = new TransferSummary(totalPacketsRequested, 0, 0, 0, 0, receiveWindow, false);
+            return lastTransferSummary;
         }
 
         // Validation des paramètres de la demande de transfert
         if (totalPacketsRequested <= 0 || receiveWindow <= 0) {
             System.out.println("[CLIENT]: Paramètres invalides pour le transfert.");
-            return;
+            lastTransferSummary = new TransferSummary(totalPacketsRequested, 0, 0, 0, 0, receiveWindow, false);
+            return lastTransferSummary;
         }
 
         receiveBuffer.clear();
         receivedData.clear();
         server.resetTransferCursor();
+        transferCorruptedPacketsDetected = 0;
+        transferRetransmissionsPerformed = 0;
 
         int remainingToRequest = totalPacketsRequested;
         int cycle = 1;
 
         // Boucle de demande de données tant qu'il reste des paquets à demander
-        while (remainingToRequest > 0) {
+        while (!canceled && remainingToRequest > 0) {
             System.out.println();
             System.out.println("========== Cycle de transfert " + cycle + " ==========");
 
@@ -131,6 +147,10 @@ public class TcpClient {
 
             processReceivedPackets(server);
 
+            if (transferListener != null) {
+                transferListener.onProgress(receivedData.size(), totalPacketsRequested);
+            }
+
             remainingToRequest = result.getRemainingPackets();
             System.out.println("[CLIENT]: Nombre de paquets restant à demander : " + remainingToRequest);
 
@@ -143,6 +163,34 @@ public class TcpClient {
         for (Packet packet : receivedData) {
             System.out.println("    " + packet);
         }
+
+        lastTransferSummary = new TransferSummary(
+                totalPacketsRequested,
+                receivedData.size(),
+            transferRetransmissionsPerformed,
+            transferCorruptedPacketsDetected,
+                cycle - 1,
+                receiveWindow,
+                remainingToRequest == 0
+        );
+
+        System.out.println();
+        System.out.println("[CLIENT]: Résumé du transfert :");
+        System.out.println("    " + lastTransferSummary);
+
+        return lastTransferSummary;
+    }
+
+    public void cancelTransfer() {
+        this.canceled = true;
+    }
+
+    public void resetCancel() {
+        this.canceled = false;
+    }
+
+    public void setTransferListener(TransferListener listener) {
+        this.transferListener = listener;
     }
 
     // Méthode pour analyser les paquets reçus, envoyer des ACK pour les paquets corrects et des NACK pour les paquets corrompus, et demander des retransmissions si nécessaire
@@ -161,12 +209,14 @@ public class TcpClient {
                 receivedData.add(packet);
             } else {
                 System.out.println("NACK pour le paquet de séquence " + packet.getSequenceNumber());
+                transferCorruptedPacketsDetected++;
 
                 Packet retransmittedPacket = server.retransmitPacket(packet.getSequenceNumber());
 
                 if (retransmittedPacket != null && !retransmittedPacket.isCorrupted()) {
                     System.out.println("ACK après retransmission pour le paquet de séquence "
                             + retransmittedPacket.getSequenceNumber());
+                    transferRetransmissionsPerformed++;
                     receivedData.add(retransmittedPacket);
                 } else {
                     System.out.println("Échec de retransmission pour le paquet de séquence "

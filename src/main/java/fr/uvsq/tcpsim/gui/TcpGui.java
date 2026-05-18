@@ -21,16 +21,16 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
-import javax.swing.JSplitPane;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -62,10 +62,10 @@ public class TcpGui {
                     break;
                 }
             }
-        } catch (Exception ignored) {
+        } catch (ClassNotFoundException | InstantiationException
+                | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ignored) {
         }
 
-        // Improve global UI readability: larger fonts for labels and buttons
         UIManager.put("Label.font", new Font("SansSerif", Font.PLAIN, 12));
         UIManager.put("Button.font", new Font("SansSerif", Font.PLAIN, 12));
         UIManager.put("ComboBox.font", new Font("SansSerif", Font.PLAIN, 12));
@@ -102,25 +102,24 @@ public class TcpGui {
         output.setEditable(false);
         output.setFont(new Font("Consolas", Font.PLAIN, 12));
         output.setBorder(new EmptyBorder(12, 12, 12, 12));
-        // Make the console visually distinct and add an initial hint
         output.setBackground(new Color(17, 17, 17));
         output.setForeground(Color.WHITE);
         output.setCaretPosition(0);
-        output.setText("Console pr\u00EAte. Cliquez sur 'Lancer' pour d\u00E9marrer la simulation.\n");
-        JScrollPane logScroll = new JScrollPane(output);
-        logScroll.setBorder(createCardBorder("📋 Trace complète"));
-        // Make console area have a visible size and always show vertical scrollbar
+        output.setText("Console prête. Cliquez sur 'Lancer' pour démarrer la simulation.\n");
         output.setRows(12);
         output.setColumns(80);
+
+        JScrollPane logScroll = new JScrollPane(output);
+        logScroll.setBorder(createCardBorder("Trace complète"));
         logScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         logScroll.setPreferredSize(new Dimension(720, 280));
 
-        // Event list to display important TCP steps (ACK, SYN, NACK, FIN...)
         DefaultListModel<String> eventModel = new DefaultListModel<>();
         JList<String> eventList = new JList<>(eventModel);
         eventList.setBackground(Color.WHITE);
+
         JScrollPane eventScroll = new JScrollPane(eventList);
-        eventScroll.setBorder(createCardBorder("\ud83d\udd14 \u00c9v\u00e9nements critiques"));
+        eventScroll.setBorder(createCardBorder("Événements critiques"));
         eventScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         eventScroll.setPreferredSize(new Dimension(300, 280));
 
@@ -128,9 +127,7 @@ public class TcpGui {
         split.setDividerLocation(720);
         split.setResizeWeight(0.75);
 
-        
-
-        JLabel statusValue = createMetricValue("Pr\u00EAt");
+        JLabel statusValue = createMetricValue("Prêt");
         JLabel packetsValue = createMetricValue("-");
         JLabel summaryValue = createMetricValue("-");
         JLabel corruptionValue = createMetricValue("-");
@@ -145,45 +142,49 @@ public class TcpGui {
         JTextField windowField = new JTextField(String.valueOf(config.getDefaultWindow()), 8);
         JTextField corruptionField = new JTextField(String.valueOf(config.getCorruptionProbability()), 8);
         JTextField lossField = new JTextField(String.valueOf(config.getLossProbability()), 8);
+
         packetsField.setPreferredSize(new Dimension(150, 26));
         windowField.setPreferredSize(new Dimension(150, 26));
         corruptionField.setPreferredSize(new Dimension(150, 26));
         lossField.setPreferredSize(new Dimension(150, 26));
 
-        JComboBox<String> presetBox = new JComboBox<>(new String[]{"Défaut", "Rapide", "Fiabilité élevée", "Stress"});
+        JComboBox<String> presetBox = new JComboBox<>(
+                new String[]{"Défaut", "Rapide", "Fiabilité élevée", "Stress"});
         presetBox.setPreferredSize(new Dimension(170, 26));
-        presetBox.setToolTipText("Choisir un pr\u00E9r\u00E9glage de simulation");
+        presetBox.setToolTipText("Choisir un préréglage de simulation");
 
         JButton runBtn = primaryButton("Lancer");
         JButton stopBtn = secondaryButton("Stop");
         JButton exportBtn = secondaryButton("Exporter CSV");
-        // Reduce button sizes to free space for the console
+
         runBtn.setPreferredSize(new Dimension(96, 32));
         stopBtn.setPreferredSize(new Dimension(80, 32));
         exportBtn.setPreferredSize(new Dimension(126, 32));
+
         exportBtn.setEnabled(false);
         stopBtn.setEnabled(false);
 
-        JPanel metricsPanel = createCardPanel("\ud83d\udcca R\u00e9sum\u00e9 du transfert");
+        JPanel metricsPanel = createCardPanel("Résumé du transfert");
         metricsPanel.setLayout(new GridBagLayout());
         metricsPanel.setPreferredSize(new Dimension(980, 110));
 
-        addMetric(metricsPanel, 0, 0, "\u00C9tat", statusValue, ACCENT);
-        addMetric(metricsPanel, 1, 0, "Paquets re\u00E7us", packetsValue, GREEN);
+        addMetric(metricsPanel, 0, 0, "État", statusValue, ACCENT);
+        addMetric(metricsPanel, 1, 0, "Paquets reçus", packetsValue, GREEN);
         addMetric(metricsPanel, 2, 0, "Cycles", summaryValue, PRIMARY);
         addMetric(metricsPanel, 3, 0, "Corruptions", corruptionValue, ORANGE);
         addMetric(metricsPanel, 4, 0, "Pertes", lossValue, RED);
 
-        JPanel formPanel = createCardPanel("\u26a1 Configuration");
+        JPanel formPanel = createCardPanel("Configuration");
         formPanel.setLayout(new GridBagLayout());
         formPanel.setPreferredSize(new Dimension(980, 120));
 
         GridBagConstraints c = new GridBagConstraints();
         c.insets = new Insets(6, 10, 6, 10);
         c.fill = GridBagConstraints.HORIZONTAL;
-        addFormCell(formPanel, c, 0, 0, "Pr\u00E9r\u00E9glage", presetBox);
-        addFormCell(formPanel, c, 0, 1, "Paquets demand\u00E9s", packetsField);
-        addFormCell(formPanel, c, 1, 0, "Fen\u00EAtre de r\u00E9ception", windowField);
+
+        addFormCell(formPanel, c, 0, 0, "Préréglage", presetBox);
+        addFormCell(formPanel, c, 0, 1, "Paquets demandés", packetsField);
+        addFormCell(formPanel, c, 1, 0, "Fenêtre de réception", windowField);
         addFormCell(formPanel, c, 1, 1, "Corruption (0.0-1.0)", corruptionField);
         addFormCell(formPanel, c, 2, 0, "Perte (0.0-1.0)", lossField);
 
@@ -198,7 +199,6 @@ public class TcpGui {
         leftPanel.setOpaque(false);
         leftPanel.add(formPanel, BorderLayout.NORTH);
         leftPanel.add(metricsPanel, BorderLayout.CENTER);
-        // Limit left panel height so console gets more vertical space
         leftPanel.setPreferredSize(new Dimension(980, 250));
 
         JPanel centerPanel = new JPanel(new BorderLayout(0, 12));
@@ -206,7 +206,6 @@ public class TcpGui {
         centerPanel.add(leftPanel, BorderLayout.NORTH);
         centerPanel.add(split, BorderLayout.CENTER);
 
-        // Now that leftPanel exists, add toggle button to actionsPanel to hide/show it
         JButton togglePanelsBtn = new JButton("Masquer Panneaux");
         togglePanelsBtn.setPreferredSize(new Dimension(140, 24));
         togglePanelsBtn.addActionListener(evt -> {
@@ -215,7 +214,6 @@ public class TcpGui {
             togglePanelsBtn.setText(visible ? "Afficher Panneaux" : "Masquer Panneaux");
             frame.validate();
         });
-        // insert toggle as first component in actionsPanel
         actionsPanel.add(togglePanelsBtn, 0);
 
         JPanel statusPanel = new JPanel(new BorderLayout());
@@ -229,40 +227,48 @@ public class TcpGui {
 
         AtomicReference<TransferSummary> lastSummaryRef = new AtomicReference<>();
         AtomicReference<TcpClient> clientRef = new AtomicReference<>();
-        AtomicReference<Thread> workerRef = new AtomicReference<>();
         AtomicReference<PrintStream> previousOutRef = new AtomicReference<>();
-        java.util.concurrent.atomic.AtomicInteger cyclesCounter = new java.util.concurrent.atomic.AtomicInteger(0);
+        java.util.concurrent.atomic.AtomicInteger cyclesCounter =
+                new java.util.concurrent.atomic.AtomicInteger(0);
 
-        presetBox.addActionListener(evt -> applyPreset(presetBox, packetsField, windowField, corruptionField, lossField));
+        presetBox.addActionListener(
+                evt -> applyPreset(presetBox, packetsField, windowField, corruptionField, lossField));
 
         runBtn.addActionListener((ActionEvent e) -> {
             runBtn.setEnabled(false);
             stopBtn.setEnabled(true);
             exportBtn.setEnabled(false);
+
             output.setText("Démarrage de la simulation...\n");
             output.setCaretPosition(output.getDocument().getLength());
             progressBar.setValue(0);
             statusValue.setText("Exécution...");
+            cyclesCounter.set(0);
 
-                                PrintStream originalOut = System.out;
-                                previousOutRef.set(originalOut);
-                                PrintStream ps = new PrintStream(new TextAreaOutputStream(output, originalOut, eventModel, eventList, corruptionValue));
+            PrintStream originalOut = System.out;
+            previousOutRef.set(originalOut);
+
+            PrintStream ps = new PrintStream(
+                    new TextAreaOutputStream(output, originalOut, eventModel, eventList, corruptionValue));
             System.setOut(ps);
 
             Thread worker = new Thread(() -> {
                 try {
                     int total = parseIntOrDefault(packetsField.getText(), config.getDefaultPackets());
                     int window = parseIntOrDefault(windowField.getText(), config.getDefaultWindow());
-                    double corruption = parseDoubleOrDefault(corruptionField.getText(), config.getCorruptionProbability());
+                    double corruption = parseDoubleOrDefault(
+                            corruptionField.getText(), config.getCorruptionProbability());
                     double loss = parseDoubleOrDefault(lossField.getText(), config.getLossProbability());
 
                     TcpClient client = new TcpClient();
                     clientRef.set(client);
 
                     TcpServer server = new TcpServer(corruption, loss);
+
                     client.setTransferListener((received, requested) -> {
                         int percent = (int) Math.round(100.0 * received / Math.max(1, requested));
                         int cycles = cyclesCounter.incrementAndGet();
+
                         SwingUtilities.invokeLater(() -> {
                             progressBar.setValue(percent);
                             packetsValue.setText(received + " / " + requested);
@@ -272,23 +278,27 @@ public class TcpGui {
 
                     client.resetCancel();
                     client.connect(server);
+
                     TransferSummary summary = client.requestAllData(server, total, window);
+
                     client.closeConnection(server);
                     lastSummaryRef.set(summary);
 
                     SwingUtilities.invokeLater(() -> {
                         if (summary != null) {
-                            packetsValue.setText(summary.getReceivedPackets() + " / " + summary.getRequestedPackets());
+                            packetsValue.setText(
+                                    summary.getReceivedPackets() + " / " + summary.getRequestedPackets());
                             summaryValue.setText(String.valueOf(summary.getCycles()));
-                            corruptionValue.setText(String.valueOf(summary.getCorruptedPacketsDetected()));
+                            corruptionValue.setText(
+                                    String.valueOf(summary.getCorruptedPacketsDetected()));
                             lossValue.setText(String.valueOf(loss));
                             statusValue.setText(summary.isCompleted() ? "Terminé" : "Interrompu");
                             progressBar.setValue(summary.isCompleted() ? 100 : progressBar.getValue());
                             exportBtn.setEnabled(true);
                         }
                     });
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+                } catch (RuntimeException ex) {
+                    System.err.println("Erreur pendant la simulation : " + ex.getMessage());
                     SwingUtilities.invokeLater(() -> statusValue.setText("Erreur"));
                 } finally {
                     System.setOut(previousOutRef.get());
@@ -299,12 +309,12 @@ public class TcpGui {
                 }
             }, "tcp-sim-worker");
 
-            workerRef.set(worker);
             worker.start();
         });
 
         stopBtn.addActionListener((ActionEvent e) -> {
             TcpClient client = clientRef.get();
+
             if (client != null) {
                 client.cancelTransfer();
                 appendLine(output, "Interruption demandée. Le client va s'arrêter.");
@@ -316,6 +326,7 @@ public class TcpGui {
 
         exportBtn.addActionListener((ActionEvent e) -> {
             TransferSummary summary = lastSummaryRef.get();
+
             if (summary == null) {
                 appendLine(output, "Aucun résumé disponible pour l'export.");
                 return;
@@ -323,6 +334,7 @@ public class TcpGui {
 
             try {
                 Path out = Paths.get(config.getExportPath());
+
                 Files.write(
                         out,
                         Arrays.asList(TransferSummary.csvHeader(), summary.toCsvRow()),
@@ -330,14 +342,14 @@ public class TcpGui {
                         StandardOpenOption.CREATE,
                         StandardOpenOption.TRUNCATE_EXISTING,
                         StandardOpenOption.WRITE);
+
                 appendLine(output, "Résumé exporté vers : " + out.toAbsolutePath());
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            } catch (IOException ex) {
+                System.err.println("Erreur export CSV : " + ex.getMessage());
                 appendLine(output, "Erreur lors de l'export CSV.");
             }
         });
 
-        // Ensure the window is large enough so the console and scrollbar are visible
         frame.setSize(1280, 840);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
@@ -349,21 +361,31 @@ public class TcpGui {
                                     JTextField corruptionField,
                                     JTextField lossField) {
         String preset = (String) presetBox.getSelectedItem();
-        if ("Rapide".equals(preset)) {
-            packetsField.setText("5");
-            windowField.setText("2");
-            corruptionField.setText("0.15");
-            lossField.setText("0.0");
-        } else if ("Fiabilité élevée".equals(preset)) {
-            packetsField.setText("8");
-            windowField.setText("3");
-            corruptionField.setText("0.05");
-            lossField.setText("0.0");
-        } else if ("Stress".equals(preset)) {
-            packetsField.setText("12");
-            windowField.setText("2");
-            corruptionField.setText("0.35");
-            lossField.setText("0.10");
+
+        switch (preset) {
+            case "Rapide":
+                packetsField.setText("5");
+                windowField.setText("2");
+                corruptionField.setText("0.15");
+                lossField.setText("0.0");
+                break;
+
+            case "Fiabilité élevée":
+                packetsField.setText("8");
+                windowField.setText("3");
+                corruptionField.setText("0.05");
+                lossField.setText("0.0");
+                break;
+
+            case "Stress":
+                packetsField.setText("12");
+                windowField.setText("2");
+                corruptionField.setText("0.35");
+                lossField.setText("0.10");
+                break;
+
+            default:
+                break;
         }
     }
 
@@ -385,12 +407,15 @@ public class TcpGui {
 
         JPanel card = new JPanel(new BorderLayout(0, 6));
         card.setBackground(PANEL_BG);
-        card.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(CARD_BORDER), new EmptyBorder(10, 12, 10, 12)));
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(CARD_BORDER),
+                new EmptyBorder(10, 12, 10, 12)));
         card.setPreferredSize(new Dimension(150, 66));
 
         JLabel titleLabel = new JLabel(title);
         titleLabel.setForeground(accentColor);
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 12f));
+
         card.add(titleLabel, BorderLayout.NORTH);
         card.add(value, BorderLayout.CENTER);
 
@@ -460,7 +485,7 @@ public class TcpGui {
         try {
             int parsed = Integer.parseInt(value.trim());
             return parsed > 0 ? parsed : defaultValue;
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             return defaultValue;
         }
     }
@@ -469,7 +494,7 @@ public class TcpGui {
         try {
             double parsed = Double.parseDouble(value.trim());
             return parsed < 0 ? defaultValue : parsed;
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             return defaultValue;
         }
     }
@@ -486,8 +511,12 @@ public class TcpGui {
         private final JLabel corruptionLabel;
         private final StringBuilder lineBuffer = new StringBuilder();
 
-        TextAreaOutputStream(JTextArea ta, PrintStream fallback, DefaultListModel<String> eventModel, JList<String> eventList, JLabel corruptionLabel) {
-            this.textArea = ta;
+        TextAreaOutputStream(JTextArea textArea,
+                             PrintStream fallback,
+                             DefaultListModel<String> eventModel,
+                             JList<String> eventList,
+                             JLabel corruptionLabel) {
+            this.textArea = textArea;
             this.fallback = fallback;
             this.eventModel = eventModel;
             this.eventList = eventList;
@@ -498,7 +527,9 @@ public class TcpGui {
         public void write(int b) throws IOException {
             fallback.write(b);
             fallback.flush();
+
             final String s = new String(new byte[]{(byte) b});
+
             SwingUtilities.invokeLater(() -> {
                 textArea.append(s);
                 textArea.setCaretPosition(textArea.getDocument().getLength());
@@ -510,7 +541,9 @@ public class TcpGui {
         public void write(byte[] b, int off, int len) throws IOException {
             fallback.write(b, off, len);
             fallback.flush();
+
             final String s = new String(b, off, len);
+
             SwingUtilities.invokeLater(() -> {
                 textArea.append(s);
                 textArea.setCaretPosition(textArea.getDocument().getLength());
@@ -519,37 +552,59 @@ public class TcpGui {
         }
 
         private void processForEvents(String chunk) {
-            // Accumulate chunk into a buffer and extract full lines
             lineBuffer.append(chunk);
+
             int idx;
+
             while ((idx = lineBuffer.indexOf("\n")) != -1) {
                 String line = lineBuffer.substring(0, idx).trim();
                 lineBuffer.delete(0, idx + 1);
-                if (line.length() == 0) continue;
-                String lower = line.toLowerCase();
-                // filter out verbose packet dumps that include 'packet{' to avoid duplication
-                if (lower.contains("packet{" ) || lower.contains("packet=") ) {
+
+                if (line.length() == 0) {
                     continue;
                 }
 
-                if (lower.contains("syn") || lower.contains("fin_ack") || lower.contains("nack") || lower.contains("retransmission") || lower.contains("connexion établie") || lower.contains("connexion fermée") || lower.contains("résumé du transfert") || lower.contains("transfert terminé") || lower.contains("erreur")) {
+                String lower = line.toLowerCase();
+
+                if (lower.contains("packet{") || lower.contains("packet=")) {
+                    continue;
+                }
+
+                boolean importantEvent =
+                        lower.contains("syn")
+                                || lower.contains("fin_ack")
+                                || lower.contains("nack")
+                                || lower.contains("retransmission")
+                                || lower.contains("connexion établie")
+                                || lower.contains("connexion fermée")
+                                || lower.contains("résumé du transfert")
+                                || lower.contains("transfert terminé")
+                                || lower.contains("erreur");
+
+                if (importantEvent) {
                     final String ev = line;
-                    SwingUtilities.invokeLater(() -> {
-                        eventModel.addElement(ev);
-                        if (eventModel.size() > 500) eventModel.remove(0);
-                        int last = eventModel.getSize() - 1;
-                        if (last >= 0) eventList.ensureIndexIsVisible(last);
-                    });
-                    // update corruption counter when NACK or 'corrompu' appears
-                    if (lower.contains("nack") || lower.contains("corrompu") || lower.contains("corruption")) {
-                        SwingUtilities.invokeLater(() -> {
-                            try {
-                                int cur = Integer.parseInt(corruptionLabel.getText());
-                                corruptionLabel.setText(String.valueOf(cur + 1));
-                            } catch (Exception ignored) {
-                                corruptionLabel.setText("1");
-                            }
-                        });
+
+                    eventModel.addElement(ev);
+
+                    if (eventModel.size() > 500) {
+                        eventModel.remove(0);
+                    }
+
+                    int last = eventModel.getSize() - 1;
+
+                    if (last >= 0) {
+                        eventList.ensureIndexIsVisible(last);
+                    }
+
+                    if (lower.contains("nack")
+                            || lower.contains("corrompu")
+                            || lower.contains("corruption")) {
+                        try {
+                            int cur = Integer.parseInt(corruptionLabel.getText());
+                            corruptionLabel.setText(String.valueOf(cur + 1));
+                        } catch (NumberFormatException ignored) {
+                            corruptionLabel.setText("1");
+                        }
                     }
                 }
             }

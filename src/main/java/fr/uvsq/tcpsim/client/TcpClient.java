@@ -11,16 +11,15 @@ import fr.uvsq.tcpsim.model.TransferResult;
 import fr.uvsq.tcpsim.model.TransferSummary;
 import fr.uvsq.tcpsim.server.TcpServer;
 
-import fr.uvsq.tcpsim.client.TransferListener;
 
 // Classe représentant le client TCP dans la simulation
 public class TcpClient {
     private TcpState state;
-    private int sequenceNumber;
+    private final int sequenceNumber;
     private int acknowledgementNumber;
 
-    private List<Packet> receiveBuffer;
-    private List<Packet> receivedData;
+    private final List<Packet> receiveBuffer;
+    private final List<Packet> receivedData;
     private TransferSummary lastTransferSummary;
     private int transferCorruptedPacketsDetected;
     private int transferRetransmissionsPerformed;
